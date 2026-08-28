@@ -1,0 +1,281 @@
+import streamlit as st
+import pandas as pd
+from io import BytesIO
+import openpyxl
+from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+
+# Configuración de página adaptable a pantallas de celulares
+st.set_page_config(page_title="IPERC Continuo IA", page_icon="⛏️", layout="centered")
+
+st.title("⛏️ IPERC Continuo Inteligente")
+st.subheader("Anexo N° 7 - D.S. 024-2016-EM")
+st.caption("Herramienta SSOMA de campo para operaciones mineras en Perú")
+
+# --- BLOQUE 1: INGRESO DE DATOS DE LA LABOR ---
+st.markdown("### 📝 Datos de la Guardia")
+ubicacion = st.text_input("Ubicación / Nivel / Área", placeholder="Ej. Nivel 2400 - Crucero 450 Oriente")
+actividad = st.text_input("Actividad General", placeholder="Ej. Sostenimiento de labor")
+tarea = st.text_input("Tarea Específica a Evaluar", placeholder="Ej. Instalación de pernos split-set con jackleg")
+
+# --- SIMULACIÓN DEL MOTOR DE INTELIGENCIA ARTIFICIAL ---
+# Base de datos local con la lógica técnica del prompt de seguridad minera
+def procesar_iperc_ia(tarea_texto):
+    tarea_lower = tarea_texto.lower()
+    
+    # Caso 1: Scaler / Desatado mecanizado
+    if "scaler" in tarea_lower or "desatado" in tarea_lower:
+        datos_tabla = [
+            ["Terreno inestable / Presencia de rocas sueltas", "Caída de rocas, aplastamiento, fatalidad", "B-3 (ALTO)", "PETS de desatado mecanizado. Operar dentro de cabina certificada ROPS/FOPS.", "E-12 (MEDIO)"],
+            ["Giro de brazo hidráulico en labor 4x4", "Atrapamiento de personal, colisión de equipo", "C-9 (MEDIO)", "Delimitación de radio de influencia (10m). Cero personal de infantería en el área.", "E-17 (BAJO)"],
+            ["Humedad / Agua en el piso del frente", "Deslizamiento o volcamiento del equipo", "C-14 (MEDIO)", "Despliegue obligatorio de estabilizadores hidráulicos antes de operar.", "E-21 (BAJO)"],
+            ["Polvo generado por impacto del martillo", "Inhalación de material particulado, visibilidad nula", "B-10 (MEDIO)", "Activación del sistema de supresión de polvo por agua pulverizada del equipo.", "E-21 (BAJO)"]
+        ]
+        secuencia = [
+            "1.- Realizar Checklist Pre-uso del Scaler (brazo hidráulico, martillo, luces y supresor).",
+            "2.- Posicionar la cabina del equipo siempre bajo techo seguro y sostenido.",
+            "3.- Anclar estabilizadores delanteros en piso nivelado antes de golpear la roca.",
+            "4.- Iniciar el desate de forma sistemática de atrás hacia adelante y de arriba hacia abajo."
+        ]
+        medida_supervisor = "Paralizar cualquier actividad de perforación o carga en el frente hasta que el operador emita conformidad de labor segura."
+        plazo = "0-24 HORAS"
+        
+    # Caso 2: Jackleg / Perforación / Pernos
+    elif "jackleg" in tarea_lower or "perforación" in tarea_lower or "perno" in tarea_lower:
+        datos_tabla = [
+            ["Desprendimiento de rocas en corona/hastiales", "Golpes por caída de rocas, aplastamiento", "B-3 (ALTO)", "Lavado y desatado minucioso de rocas sueltas antes de la instalación.", "E-12 (MEDIO)"],
+            ["Manipulación de barras de perforación en movimiento", "Atrapamiento de extremidades, fracturas", "C-9 (MEDIO)", "Uso obligatorio de guantes de nitrilo, mantener manos fuera de la línea de fuego.", "E-17 (BAJO)"],
+            ["Ruido excesivo generado por la máquina Jackleg", "Hipoacusia neurosensorial (sordera)", "A-14 (MEDIO)", "Uso obligatorio de doble protección auditiva (tapón + orejera).", "E-21 (BAJO)"],
+            ["Presencia de tiros cortados (mallas anteriores)", "Explosión imprevista, fatalidad múltiple", "C-2 (ALTO)", "Inspección visual obligatoria del frente. Prohibido perforar en " + '"tacos"' + " viejos.", "E-12 (MEDIO)"]
+        ]
+        secuencia = [
+            "1.- Verificar presiones de aire y agua, y estado de las mangueras de la Jackleg.",
+            "2.- Realizar el desatado manual de rocas sueltas usando la barretilla adecuada según la altura.",
+            "3.- Posicionar el pie de avance sobre piso firme y asegurar el ángulo de perforación.",
+            "4.- Instalar el perno manteniendo la distancia crítica de seguridad operativa."
+        ]
+        medida_supervisor = "Verificar de manera presencial el lavado del frente de disparo y dar el visto bueno de la zona libre de tiros cortados."
+        plazo = "0-24 HORAS"
+        
+    # Caso por defecto si el usuario escribe otra tarea
+    else:
+        datos_tabla = [
+            ["Energía mecánica / herramientas de mano", "Golpes, cortes, contusiones por herramientas", "C-14 (MEDIO)", "Inspección de herramientas con cinta del mes, uso de EPP básico.", "E-21 (BAJO)"],
+            ["Superficie de trabajo irregular (Piso de mina)", "Caídas al mismo nivel, torceduras de tobillo", "D-19 (BAJO)", "Mantener orden y limpieza (5S), iluminación adecuada en la zona.", "E-25 (BAJO)"]
+        ]
+        secuencia = [
+            "1.- Inspeccionar el área de trabajo y retirar herramientas u obstáculos del piso.",
+            "2.- Verificar el estado y certificación de las herramientas manuales a utilizar.",
+            "3.- Ejecutar la tarea manteniendo posturas ergonómicas correctas."
+        ]
+        medida_supervisor = "Inspección inopinada del cumplimiento de las 5S (Orden y Limpieza) en la zona de trabajo."
+        plazo = "0-72 HORAS"
+        
+    return datos_tabla, secuencia, medida_supervisor, plazo
+
+# --- BOTÓN DE PROCESAMIENTO ---
+if st.button("🚀 Generar Matriz IPERC con IA"):
+    if not ubicacion or not actividad or not tarea:
+        st.error("⚠️ Por favor, rellena todos los campos antes de procesar con la IA.")
+    else:
+        with st.spinner("Analizando riesgos con el motor SSOMA..."):
+            tabla_res, seq_res, med_sup, plazo_sup = procesar_iperc_ia(tarea)
+            
+            # Almacenar en el estado de Streamlit para no perder los datos al descargar
+            st.session_state['tabla'] = tabla_res
+            st.session_state['secuencia'] = seq_res
+            st.session_state['medida'] = med_sup
+            st.session_state['plazo'] = plazo_sup
+            st.session_state['procesado'] = True
+
+# --- MOSTRAR RESULTADOS EN PANTALLA ---
+if st.get_state().get('procesado', False):
+    st.success("✅ ¡Matriz IPERC Calculada Exitosamente!")
+    
+    # Bloque 1 en pantalla
+    st.markdown("### 📊 BLOQUE 1: Tabla de Riesgos")
+    df = pd.DataFrame(st.session_state['tabla'], columns=["Peligro", "Riesgo", "Evaluación Inicial", "Control", "Riesgo Residual"])
+    st.dataframe(df)
+    
+    # Bloque 2 en pantalla
+    st.markdown("### 🔄 BLOQUE 2: Secuencia de Control")
+    for paso in st.session_state['secuencia']:
+        st.write(paso)
+        
+    # Bloque 3 en pantalla
+    st.markdown("### 🛡️ BLOQUE 3: Supervisión")
+    st.info(f"**Medida Correctiva:** {st.session_state['medida']} \n\n **Plazo:** {st.session_state['plazo']}")
+
+    # --- EXPORTAR EXCEL FORMATEADO (ANEXO 7) ---
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Anexo 7 - IPERC"
+    ws.views.sheetView[0].showGridLines = True
+    
+    # Estilos
+    font_titulo = Font(name="Arial", size=11, bold=True)
+    font_bold = Font(name="Arial", size=9, bold=True)
+    font_normal = Font(name="Arial", size=9)
+    fill_header = PatternFill(start_color="1F497D", end_color="1F497D", fill_type="solid") # Azul institucional
+    border_fino = Border(left=Side(style='thin'), right=Side(style='thin'), top=Side(style='thin'), bottom=Side(style='thin'))
+    align_center = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    align_left = Alignment(horizontal="left", vertical="center", wrap_text=True)
+
+    # Cabecera oficial
+    ws.merge_cells("A1:E1")
+    ws["A1"] = "FORMATO OFICIAL - ANEXO N° 7 (IPERC CONTINUO)"
+    ws["A1"].font = font_titulo
+    ws["A1"].alignment = align_center
+    
+    ws["A3"] = f"UBICACIÓN: {ubicacion}"
+    ws["A4"] = f"ACTIVIDAD: {actividad}"
+    ws["A5"] = f"TAREA EVALUADA: {tarea}"
+    for r in [3,4,5]: ws[f"A{r}"].font = font_bold
+    
+    # Encabezados de tabla
+    headers = ["DESCRIPCIÓN DEL PELIGRO", "RIESGO ASOCIADO", "EVAL. INICIAL", "MEDIDAS DE CONTROL", "EVAL. RESIDUAL"]
+    for col_idx, h in enumerate(headers, 1):
+        cell = ws.cell(row=7, column=col_idx, value=h)
+        cell.font = Font(name="Arial", size=9, bold=True, color="FFFFFF")
+        cell.fill = fill_header
+        cell.alignment = align_center
+        cell.border = border_fino
+        
+    # Escribir filas calculadas por IA
+    row_idx = 8
+    for fila in st.session_state['tabla']:
+        for col_idx, valor in enumerate(fila, 1):
+            cell = ws.cell(row=row_idx, column=col_idx, value=valor)
+            cell.font = font_normal
+            cell.border = border_fino
+            cell.alignment = align_center if col_idx in [3, 5] else align_left
+        row_idx += 1
+        
+    # Secuencia de control
+    row_idx += 1
+    ws.cell(row=row_idx, column=1, value="SECUENCIA PARA CONTROLAR EL PELIGRO:").font = font_bold
+    row_idx += 1
+    for paso in st.session_state['secuencia']:
+        ws.cell(row=row_idx, column=1, value=paso).font = font_normal
+        row_idx += 1
+        
+    # Firma supervisor
+    row_idx += 1
+    ws.cell(row=row_idx, column=1, value=f"MEDIDA CORRECTIVA SUPERVISOR: {st.session_state['medida']}").font = font_bold
+    ws.cell(row=row_idx+1, column=1, value=f"PLAZO DE IMPLEMENTACIÓN: {st.session_state['plazo']}").font = font_bold
+
+    # Autoajuste de columnas
+    for col in ws.columns:
+        max_len = max(len(str(cell.value or '')) for cell in col)
+        col_letter = openpyxl.utils.get_column_letter(col[0].column)
+        ws.column_dimensions[col_letter].width = min(max(max_len + 3, 12), 40)
+
+    # Conversión a bytes para descarga directa
+    output = BytesIO()
+    wb.save(output)
+    excel_data = output.getvalue()
+    
+    st.markdown("---")
+    st.download_button(
+        label="📥 Descargar Anexo 7 en Excel",
+        data=excel_data,
+        file_name="Anexo_7_IPERC_Continuo_IA.xlsx",
+def procesar_iperc_ia(tarea_texto):
+    tarea_lower = tarea_texto.lower()
+    
+    # Caso 1: Scaler / Desatado mecanizado
+    if "scaler" in tarea_lower or "desatado" in tarea_lower:
+        datos_tabla = [
+            ["Terreno inestable / Presencia de rocas sueltas", "Caída de rocas, aplastamiento, fatalidad", "B-3 (ALTO)", "PETS de desatado mecanizado. Operar dentro de cabina certificada ROPS/FOPS.", "E-12 (MEDIO)"],
+            ["Giro de brazo hidráulico en labor 4x4", "Atrapamiento de personal, colisión de equipo", "C-9 (MEDIO)", "Delimitación de radio de influencia (10m). Cero personal de infantería en el área.", "E-17 (BAJO)"],
+            ["Humedad / Agua en el piso del frente", "Deslizamiento o volcamiento del equipo", "C-14 (MEDIO)", "Despliegue obligatorio de estabilizadores hidráulicos antes de operar.", "E-21 (BAJO)"],
+            ["Polvo generado por impacto del martillo", "Inhalación de material particulado, visibilidad nula", "B-10 (MEDIO)", "Activación del sistema de supresión de polvo por agua pulverizada del equipo.", "E-21 (BAJO)"]
+        ]
+        secuencia = [
+            "1.- Realizar Checklist Pre-uso del Scaler (brazo hidráulico, martillo, luces y supresor).",
+            "2.- Posicionar la cabina del equipo siempre bajo techo seguro y sostenido.",
+            "3.- Anclar estabilizadores delanteros en piso nivelado antes de golpear la roca.",
+            "4.- Iniciar el desate de forma sistemática de atrás hacia adelante y de arriba hacia abajo."
+        ]
+        medida_supervisor = "Paralizar cualquier actividad de perforación o carga en el frente hasta que el operador emita conformidad de labor segura."
+        plazo = "0-24 HORAS"
+        
+    # Caso 2: Jackleg / Perforación / Pernos
+    elif "jackleg" in tarea_lower or "perforación" in tarea_lower or "perno" in tarea_lower:
+        datos_tabla = [
+            ["Desprendimiento de rocas en corona/hastiales", "Golpes por caída de rocas, aplastamiento", "B-3 (ALTO)", "Lavado y desatado minucioso de rocas sueltas antes de la instalación.", "E-12 (MEDIO)"],
+            ["Manipulación de barras de perforación en movimiento", "Atrapamiento de extremidades, fracturas", "C-9 (MEDIO)", "Uso obligatorio de guantes de nitrilo, mantener manos fuera de la línea de fuego.", "E-17 (BAJO)"],
+            ["Ruido excesivo generado por la máquina Jackleg", "Hipoacusia neurosensorial (sordera)", "A-14 (MEDIO)", "Uso obligatorio de doble protección auditiva (tapón + orejera).", "E-21 (BAJO)"],
+            ["Presencia de tiros cortados (mallas anteriores)", "Explosión imprevista, fatalidad múltiple", "C-2 (ALTO)", "Inspección visual obligatoria del frente. Prohibido perforar en tacos viejos.", "E-12 (MEDIO)"]
+        ]
+        secuencia = [
+            "1.- Verificar presiones de aire y agua, y estado de las mangueras de la Jackleg.",
+            "2.- Realizar el desatado manual de rocas sueltas usando la barretilla adecuada según la altura.",
+            "3.- Posicionar el pie de avance sobre piso firme y asegurar el ángulo de perforación.",
+            "4.- Instalar el perno manteniendo la distancia crítica de seguridad operativa."
+        ]
+        medida_supervisor = "Verificar de manera presencial el lavado del frente de disparo y dar el visto bueno de la zona libre de tiros cortados."
+        plazo = "0-24 HORAS"
+
+    # NUEVO Caso 3: Trabajos en Caliente (Soldadura, oxicorte)
+    elif "caliente" in tarea_lower or "soldadura" in tarea_lower or "corte" in tarea_lower:
+        datos_tabla = [
+            ["Chispas / Escorias incandescentes expuestas", "Incendios, quemaduras graves, amagos en interior mina", "B-3 (ALTO)", "Liberar un radio de 11 metros de material inflamable. Contar con extintor PQS de 9kg mínimo cargado al día.", "E-12 (MEDIO)"],
+            ["Gases de soldadura / Humos metálicos", "Intoxicación, asfixia, afección respiratoria crónica", "C-9 (MEDIO)", "Uso obligatorio de respirador de media cara con filtros para humos metálicos (2097). Suministrar ventilación forzada si es zona confinada o taller.", "E-17 (BAJO)"],
+            ["Radiación ultravioleta / Infrarroja del arco eléctrico", "Daño ocular severo (arco eléctrico), quemaduras en piel", "B-10 (MEDIO)", "Uso obligatorio de careta de soldar con visor del grado de sombra adecuado y ropa de cuero completa (casaca, escarpines, guantes caña larga).", "E-21 (BAJO)"]
+        ]
+        secuencia = [
+            "1.- Llenar y firmar obligatoriamente el PETAR de Trabajo en Caliente junto a la supervisión.",
+            "2.- Inspeccionar el equipo de soldar (cables sin empalmes expuestos, pinza masa y porta-electrodo en buen estado).",
+            "3 ..- Retirar o cubrir todo material combustible del área con mantas ignífugas.",
+            "4.- Colocar pantallas o biombos de seguridad para proteger a terceros de la radiación del arco."
+        ]
+        medida_supervisor = "Verificar físicamente la colocación del vigía de fuego (Firewatch) y comprobar que permanezca en el área hasta 30 minutos después de acabar la tarea."
+        plazo = "0-24 HORAS"
+
+    # NUEVO Caso 4: Espacios Confinados (Tolvas, tanques, chimeneas)
+    elif "confinado" in tarea_lower or "espacio" in tarea_lower or "tolva" in tarea_lower:
+        datos_tabla = [
+            ["Atmósfera peligrosa (Deficiencia de O2 / Gases tóxicos CO, H2S)", "Asfixia, intoxicación letal, pérdida del conocimiento", "A-2 (ALTO)", "Monitoreo continuo de gases con detector multigas calibrado (O2 > 19.5%). Uso de ventilación mecánica extractora/impulsora activa.", "E-12 (MEDIO)"],
+            ["Configuración interna / Espacio restringido", "Atrapamiento, dificultad de evacuación en emergencias", "B-3 (ALTO)", "Uso de arnés de seguridad de cuerpo entero conectado a una línea de vida y sistema de rescate vertical (trípode) exterior.", "E-12 (MEDIO)"],
+            ["Energías peligrosas residuales (mecánica, eléctrica, fluidos)", "Aplastamiento por caída de carga, electrocución", "C-2 (ALTO)", "Aplicación estricta de Bloqueo y Etiquetado (LOTO) en válvulas, motores y alimentadores que conectan al espacio.", "E-12 (MEDIO)"]
+        ]
+        secuencia = [
+            "1.- Emitir el PETAR de Espacio Confinado y realizar la medición inicial de gases registrando los valores en el formato.",
+            "2.- Asegurar la presencia permanente del vigía de espacio confinado en el exterior de la labor.",
+            "3.- Instalar y verificar el correcto flujo del sistema de ventilación auxiliar antes del ingreso.",
+            "4.- Mantener comunicación radial o visual constante entre el personal entrante y el vigía externo."
+        ]
+        medida_supervisor = "Auditar el registro de medición de gases cada 2 horas en la labor y constatar que el vigía de superficie cuente con el equipo de rescate listo."
+        plazo = "0-24 HORAS"
+
+    # NUEVO Caso 5: Izajes de carga (Grúas, tecles, camión grúa)
+    elif "izaje" in tarea_lower or "carga" in tarea_lower or "grúa" in tarea_lower:
+        datos_tabla = [
+            ["Carga suspendida en movimiento", "Caída de la carga, aplastamiento directo, fatalidad", "B-2 (ALTO)", "Prohibición absoluta de transitar bajo la carga. Uso obligatorio de vientos (sogas guía) para controlar el movimiento.", "E-12 (MEDIO)"],
+            ["Accesorios de izaje defectuosos (estrorobos, eslingas, grilletes)", "Ruptura de accesorios, caída violenta de la estructura", "C-3 (ALTO)", "Inspección rigurosa de aparejos de izaje. Utilizar solo accesorios que tengan la placa de capacidad de carga legible y la cinta de color del mes.", "E-12 (MEDIO)"],
+            ["Líneas eléctricas aéreas / Interferencia en el radio de giro", "Electrocución por arco eléctrico, choque de la pluma", "B-4 (ALTO)", "Mantener las distancias mínimas de seguridad a cables eléctricos según el tendido de alta/baja tensión. Contar con rigger certificado.", "E-21 (BAJO)"]
+        ]
+        secuencia = [
+            "1.- Diligenciar el PETAR de Izaje Crítico (si excede el 80% de capacidad) y el plan de izaje (Rigging Plan).",
+            "2.- Delimitar y restringir completamente el área de influencia del giro de la grúa con cinta roja de peligro.",
+            "3.- Inspeccionar los puntos de anclaje de la carga y el nivel de nivelación de los estabilizadores del camión grúa.",
+            "4.- Iniciar el movimiento coordinando únicamente mediante las señales estándar del rigger hacia el operador."
+        ]
+        medida_supervisor = "Validar el cálculo del porcentaje de capacidad de la grúa en el Rigging Plan antes de autorizar el despegue de la carga."
+        plazo = "0-24 HORAS"
+        
+    # Caso por defecto si el usuario escribe otra tarea estándar
+    else:
+        datos_tabla = [
+            ["Energía mecánica / herramientas de mano", "Golpes, cortes, contusiones por herramientas", "C-14 (MEDIO)", "Inspección de herramientas con cinta del mes, uso de EPP básico.", "E-21 (BAJO)"],
+            ["Superficie de trabajo irregular (Piso de mina)", "Caídas al mismo nivel, torceduras de tobillo", "D-19 (BAJO)", "Mantener orden y limpieza (5S), iluminación adecuada en la zona.", "E-25 (BAJO)"]
+        ]
+        secuencia = [
+            "1.- Inspeccionar el área de trabajo y retirar herramientas u obstáculos del piso.",
+            "2.- Verificar el estado y certificación de las herramientas manuales a utilizar.",
+            "3.- Ejecutar la tarea manteniendo posturas ergonómicas correctas."
+        ]
+        medida_supervisor = "Inspección inopinada del cumplimiento de las 5S (Orden y Limpieza) en la zona de trabajo."
+        plazo = "0-72 HORAS"
+        
+    return datos_tabla, secuencia, medida_supervisor, plazo
